@@ -1,0 +1,54 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+/node_modules
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native (Files that should ALWAYS be ignored)
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+/android/build
+/android/.gradle
+/android/local.properties
+/ios/build
+/ios/Pods
+/ios/.xccheckout
+*.xcworkspace
+*.xcscheme
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-debug*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files (CORRECTED LINE)
+.env
+.env.*.local
+.env.local
+
+# typescript
+*.tsbuildinfo
+
+# generated folders (KEEPING THEM IGNORED IF YOU ARE SURE)
+# If you are using Expo managed workflow, keeping these ignored is sometimes acceptable.
+# If you are NOT using Expo managed, you should typically REMOVE these lines to commit the native projects.
+# /ios
+# /android
