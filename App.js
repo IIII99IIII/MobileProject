@@ -4,47 +4,42 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-
-// --- 1. IMPORTACIONES ADICIONALES ---
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 
-// Importamos las pantallas de autenticación
+// Auth screens
 import LoginForm from './src/components/formulario/LoginForm';
 import SignUpForm from './src/components/formulario/SignUpForm';
 
-// Importamos las pantallas de la app principal
-import HomeScreen from './src/screens/homeScreen/HomeScreen';
+// Main app screens / stacks
+import HomeScreen from './src/screens/homeTurnoScreen/HomeTurnoScreen';
 import ProfileScreen from './src/screens/profileScreen/ProfileScreen';
-
-// 👇 IMPORTAMOS LAS NUEVAS PANTALLAS DEL CRUD
-import ProductListScreen from './src/screens/productListScreen/ProductListScreen';
-import AddProductScreen from './src/screens/addProductScreen/AddProductScreen';
-import EditProductScreen from './src/screens/editProductScreen/EditProductScreen';
+import AddTurnoScreen from './src/screens/addTurnoScreen/AddTurnoScreen';
+import TurnoListScreen from './src/screens/turnoListScreen/TurnoListScreen';
+import EditTurnoScreen from './src/screens/editTurnoScreen/EditTurnoScreen';
+import DetailTurnoScreen from './src/screens/detailTurnoScreen/DetailTurnoScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-
-
-// --- NAVEGADORES DE PILA (STACKS) ---
 
 function HomeStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Inicio' }} />
+      <Stack.Screen name="DetailTurno" component={DetailTurnoScreen} options={{ title: 'Detalle del Turno' }} />
     </Stack.Navigator>
   );
 }
 
-// 👇 NUEVO STACK PARA EL FLUJO COMPLETO DEL CRUD DE PRODUCTOS
-function ProductStack() {
-    return (
-        <Stack.Navigator>
-            <Stack.Screen name="ProductList" component={ProductListScreen} options={{ title: 'Mis Productos' }} />
-            <Stack.Screen name="AddProduct" component={AddProductScreen} options={{ title: 'Añadir Producto' }} />
-            <Stack.Screen name="EditProduct" component={EditProductScreen} options={{ title: 'Editar Producto' }} />
-        </Stack.Navigator>
-    )
+function TurnoStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="TurnoList" component={TurnoListScreen} options={{ title: 'Mis Turnos' }} />
+      <Stack.Screen name="AddTurno" component={AddTurnoScreen} options={{ title: 'Añadir Turno' }} />
+      <Stack.Screen name="EditTurno" component={EditTurnoScreen} options={{ title: 'Editar Turno' }} />
+      <Stack.Screen name="DetailTurno" component={DetailTurnoScreen} options={{ title: 'Detalle del Turno' }} />
+    </Stack.Navigator>
+  );
 }
 
 function ProfileStack() {
@@ -55,8 +50,6 @@ function ProfileStack() {
   );
 }
 
-
-// --- NAVEGADOR DE PESTAÑAS (CUANDO EL USUARIO ESTÁ LOGUEADO) ---
 function MainAppTabs() {
   return (
     <Tab.Navigator
@@ -65,8 +58,8 @@ function MainAppTabs() {
           let iconName;
           if (route.name === 'InicioTab') {
             iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'ProductosTab') { // 👇 ÍCONO PARA LA NUEVA PESTAÑA
-            iconName = focused ? 'cube' : 'cube-outline';
+          } else if (route.name === 'TurnosTab') {
+            iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'PerfilTab') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -77,17 +70,13 @@ function MainAppTabs() {
         headerShown: false,
       })}
     >
-      {/* Asigna cada pestaña a su respectivo componente Stack */}
-      <Tab.Screen name="InicioTab" component={HomeStack} options={{ title: 'Inicio' }}/>
-      <Tab.Screen name="ProductosTab" component={ProductStack} options={{ title: 'Productos' }}/>
-      <Tab.Screen name="PerfilTab" component={ProfileStack} options={{ title: 'Perfil' }}/>
+      <Tab.Screen name="InicioTab" component={HomeStack} options={{ title: 'Inicio' }} />
+      <Tab.Screen name="TurnosTab" component={TurnoStack} options={{ title: 'Turnos' }} />
+      <Tab.Screen name="PerfilTab" component={ProfileStack} options={{ title: 'Perfil' }} />
     </Tab.Navigator>
   );
 }
 
-
-// --- NAVEGADOR DE AUTENTICACIÓN (CUANDO EL USUARIO NO ESTÁ LOGUEADO) ---
-// No necesita cambios
 function AuthStack() {
   return (
     <Stack.Navigator>
@@ -97,9 +86,6 @@ function AuthStack() {
   );
 }
 
-
-// --- COMPONENTE PRINCIPAL (EL "CEREBRO" O ROUTER) ---
-// No necesita cambios
 export default function App() {
   const [user, setUser] = useState(null);
 

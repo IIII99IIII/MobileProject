@@ -1,15 +1,16 @@
-// src/components/BotonPersonalizado.jsx
+// src/components/botonPersonalizado/BotonPersonalizado.jsx
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Alert } from 'react-native';
 
-const BotonPersonalizado = ({  titulo, colorFondo }) => {
-    const presionar = () => {
-      Alert.alert("Hola", "Botón presionado!");
-    };
+const BotonPersonalizado = ({ titulo, colorFondo = '#007bff', onPress }) => {
+  const presionar = () => {
+    if (onPress) return onPress();
+    Alert.alert("Hola", "Botón presionado!");
+  };
   return (
     <TouchableOpacity
-      style={[styles.boton, { backgroundColor: colorFondo || '#007bff' }]}
+      style={[styles.boton, { backgroundColor: colorFondo }]}
       onPress={presionar}
     >
       <Text style={styles.textoBoton}>{titulo}</Text>
@@ -24,8 +25,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 3, // Sombra para Android
-    shadowColor: '#000', // Sombra para iOS
+    elevation: 3,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
