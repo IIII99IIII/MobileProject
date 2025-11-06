@@ -1,15 +1,17 @@
-// src/screens/homeTurnoScreen/HomeTurnoScreen.jsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { db } from '../../../firebaseConfig';
-import BotonPersonalizado from '../../components/botonPersonalizado/BotonPersonalizado';
+import { TAB_HEIGHT } from '../../navigation/MainPagerTabs';
 
 const HomeTurnoScreen = ({ navigation }) => {
   const [proximos, setProximos] = useState([]);
+  const insets = useSafeAreaInsets();
+  const bottomPad = TAB_HEIGHT + insets.bottom + 24; // espacio para no tapar contenido
+  const fabBottom = TAB_HEIGHT + insets.bottom + 26; // un poco arriba de la barra
 
   useEffect(() => {
-    // mostramos los próximos 5 turnos ordenados por fecha y hora
     const q = query(collection(db, 'turnos'), orderBy('fecha', 'asc'), orderBy('hora', 'asc'), limit(5));
     const unsubscribe = onSnapshot(q, (qs) => {
       const arr = [];
@@ -20,7 +22,7 @@ const HomeTurnoScreen = ({ navigation }) => {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: bottomPad }]}>
       <Text style={styles.titulo}>Bienvenida Dra. — Agenda Odontológica</Text>
       <Text style={styles.subtitulo}>Próximos turnos</Text>
 
@@ -37,13 +39,10 @@ const HomeTurnoScreen = ({ navigation }) => {
         ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 8 }}>No hay turnos programados.</Text>}
       />
 
-      <View style={{ marginTop: 20 }}>
-        <Button title="Agregar Turno" onPress={() => navigation.navigate('AddTurno')} />
-      </View>
-
-      <View style={{ marginTop: 16 }}>
-        <BotonPersonalizado titulo="Ver Agenda Completa" colorFondo="#28a745" onPress={() => navigation.navigate('TurnoList')} />
-      </View>
+      {/* FAB */}
+      <TouchableOpacity style={[styles.fab, { bottom: fabBottom }]} onPress={() => navigation.navigate('AddTurno')}>
+        <Text style={styles.fabText}>＋</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -55,6 +54,18 @@ const styles = StyleSheet.create({
   turno: { padding: 12, backgroundColor: '#fff', borderRadius: 8, marginBottom: 8, elevation: 1 },
   nombre: { fontWeight: '700', fontSize: 16 },
   motivo: { color: '#666', marginTop: 4 },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'tomato',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+  },
+  fabText: { color: '#fff', fontSize: 28, lineHeight: 30, fontWeight: 'bold' }
 });
 
 export default HomeTurnoScreen;

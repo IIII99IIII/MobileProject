@@ -1,15 +1,15 @@
-// src/screens/editTurnoScreen/EditTurnoScreen.jsx
 import React from 'react';
 import { View, Button, TextInput, StyleSheet, Alert, Text, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { doc, updateDoc, setDoc, getDoc, addDoc, collection } from 'firebase/firestore';
 import { db } from '../../../firebaseConfig';
+import { TAB_HEIGHT } from '../../navigation/MainPagerTabs';
 
 const EditTurnoScreen = ({ route, navigation }) => {
-  const { turno } = route.params || {}; // defensivo
-
-  // Para debug: ver qué llega por params (quitar en producción si querés)
-  console.log('EditTurnoScreen route.params:', route.params);
+  const { turno } = route.params || {};
+  const insets = useSafeAreaInsets();
+  const bottomPad = TAB_HEIGHT + insets.bottom + 24;
 
   const { control, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -17,35 +17,29 @@ const EditTurnoScreen = ({ route, navigation }) => {
       fecha: turno?.fecha || '',
       hora: turno?.hora || '',
       motivo: turno?.motivo || '',
-    }
+    },
   });
 
   const onSubmit = async (data) => {
     try {
-      // Validaciones mínimas (podés ampliar)
       if (!data.fecha || !data.hora) {
         Alert.alert('Error', 'Fecha y hora son obligatorias.');
         return;
       }
-
-      // Construimos fechaHora ISO (asegurate que fecha y hora vienen en YYYY-MM-DD y HH:MM)
       const fechaHoraISO = new Date(`${data.fecha}T${data.hora}:00`).toISOString();
-
       const payload = {
         nombrePaciente: data.nombrePaciente,
         fecha: data.fecha,
         hora: data.hora,
         fechaHora: fechaHoraISO,
         motivo: data.motivo,
-        actualizadoEn: new Date().toISOString()
+        actualizadoEn: new Date().toISOString(),
       };
 
-      // Si no nos pasaron ID en el turno -> creamos un nuevo doc con addDoc
       if (!turno || !turno.id) {
-        console.warn('No se recibió turno.id en params -> creando nuevo documento en lugar de actualizar');
         const docRef = await addDoc(collection(db, 'turnos'), {
           ...payload,
-          creadoEn: new Date().toISOString()
+          creadoEn: new Date().toISOString(),
         });
         console.log('Documento creado con id:', docRef.id);
         Alert.alert('Creado', 'No se encontró el turno original; se creó uno nuevo con los cambios.');
@@ -53,27 +47,20 @@ const EditTurnoScreen = ({ route, navigation }) => {
         return;
       }
 
-      // Si tenemos ID, apuntamos al doc ref
       const turnoDocRef = doc(db, 'turnos', turno.id);
-
-      // Comprobamos si el documento existe
       const snapshot = await getDoc(turnoDocRef);
 
       if (snapshot.exists()) {
-        // Actualizamos el doc existente
         await updateDoc(turnoDocRef, payload);
         Alert.alert('Éxito', 'Turno actualizado correctamente.');
       } else {
-        // Si no existe, lo creamos con setDoc (mismo id)
-        console.warn(`El documento con id ${turno.id} no existe. Se creará uno nuevo con ese id.`);
         await setDoc(turnoDocRef, {
           ...payload,
-          creadoEn: new Date().toISOString()
+          creadoEn: new Date().toISOString(),
         });
         Alert.alert('Aviso', 'El turno original no existía; se creó un nuevo documento con los cambios.');
       }
 
-      // Volver a la lista completa para que se vea el cambio
       navigation.navigate('TurnoList');
     } catch (error) {
       console.error('Error actualizando turno: ', error);
@@ -82,7 +69,7 @@ const EditTurnoScreen = ({ route, navigation }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingBottom: bottomPad }]}>
       <Text style={styles.label}>Nombre del Paciente</Text>
       <Controller
         control={control}
@@ -100,7 +87,7 @@ const EditTurnoScreen = ({ route, navigation }) => {
         name="fecha"
         rules={{
           required: 'La fecha es obligatoria.',
-          pattern: { value: /^\d{4}-\d{2}-\d{2}$/, message: 'Formato YYYY-MM-DD.' }
+          pattern: { value: /^\d{4}-\d{2}-\d{2}$/, message: 'Formato YYYY-MM-DD.' },
         }}
         render={({ field: { onChange, value } }) => (
           <TextInput style={styles.input} onChangeText={onChange} value={value} />
@@ -114,7 +101,7 @@ const EditTurnoScreen = ({ route, navigation }) => {
         name="hora"
         rules={{
           required: 'La hora es obligatoria.',
-          pattern: { value: /^([01]\d|2[0-3]):([0-5]\d)$/, message: 'Formato HH:MM.' }
+          pattern: { value: /^([01]\d|2[0-3]):([0-5]\d)$/, message: 'Formato HH:MM.' },
         }}
         render={({ field: { onChange, value } }) => (
           <TextInput style={styles.input} onChangeText={onChange} value={value} />

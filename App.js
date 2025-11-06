@@ -1,6 +1,9 @@
 // App.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 
@@ -8,21 +11,25 @@ import { MainAppTabs, AuthStack } from './src/navigation/Navigation';
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [ready, setReady] = useState(false); // opcional: evita parpadeos mientras auth se inicializa
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
       setReady(true);
     });
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
 
-  // Si quisieras, podrías mostrar splash/loading mientras !ready
+  if (!ready) return null;
+
   return (
-    <NavigationContainer>
-      {user ? <MainAppTabs /> : <AuthStack />}
-    </NavigationContainer>
+    <SafeAreaProvider>
+      {/* key evita el error de “another navigator is already registered” al cambiar user */}
+      <NavigationContainer key={user ? 'user' : 'guest'}>
+        {user ? <MainAppTabs /> : <AuthStack />}
+      </NavigationContainer>
+      <StatusBar style="dark" />
+    </SafeAreaProvider>
   );
 }
- 

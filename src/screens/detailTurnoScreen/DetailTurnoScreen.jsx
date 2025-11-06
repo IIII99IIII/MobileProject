@@ -1,20 +1,23 @@
-// src/screens/detailTurnoScreen/DetailTurnoScreen.jsx
 import React from 'react';
-import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TAB_HEIGHT } from '../../navigation/MainPagerTabs';
 
 const DetailTurnoScreen = ({ route, navigation }) => {
   const { turno } = route.params || {};
+  const insets = useSafeAreaInsets();
+  const bottomPad = TAB_HEIGHT + insets.bottom + 24;
 
   if (!turno) {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, { paddingBottom: bottomPad }]}>
         <Text>No se encontró el turno.</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: bottomPad }]}>
       <Text style={styles.title}>{turno.nombrePaciente}</Text>
       <Text style={styles.line}>Fecha: {turno.fecha}</Text>
       <Text style={styles.line}>Hora: {turno.hora}</Text>
