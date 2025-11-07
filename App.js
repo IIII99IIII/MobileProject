@@ -8,6 +8,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 
 import { MainAppTabs, AuthStack } from './src/navigation/Navigation';
+import { MenuProvider } from 'react-native-popup-menu'; // <-- importamos MenuProvider
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -25,11 +26,12 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      {/* key evita el error de “another navigator is already registered” al cambiar user */}
-      <NavigationContainer key={user ? 'user' : 'guest'}>
-        {user ? <MainAppTabs /> : <AuthStack />}
-      </NavigationContainer>
-      <StatusBar style="dark" />
+      <MenuProvider> {/* <-- envolvemos la app */}
+        <NavigationContainer key={user ? 'user' : 'guest'}>
+          {user ? <MainAppTabs /> : <AuthStack />}
+        </NavigationContainer>
+        <StatusBar style="dark" />
+      </MenuProvider>
     </SafeAreaProvider>
   );
 }
