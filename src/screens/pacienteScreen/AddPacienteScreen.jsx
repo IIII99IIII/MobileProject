@@ -1,3 +1,4 @@
+// Importación de dependencias principales de React y React Native
 import React, { useState, useRef } from 'react';
 import {
   View,
@@ -17,14 +18,19 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Ionicons } from '@expo/vector-icons';
 
+// 💙 Pantalla para agregar un nuevo paciente
 export default function AddPacienteScreen({ navigation, route }) {
+  // Recibe la función addPaciente desde la pantalla anterior (si existe)
   const { addPaciente } = route.params || {};
+
+  // Estados locales para los campos del formulario
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
   const [edad, setEdad] = useState('');
   const [direccion, setDireccion] = useState('');
 
+  // Referencias para manejar el scroll automático al enfocar inputs
   const scrollRef = useRef(null);
   const inputRefs = {
     nombre: useRef(null),
@@ -34,14 +40,17 @@ export default function AddPacienteScreen({ navigation, route }) {
     direccion: useRef(null),
   };
 
+  // ✅ Función que se ejecuta al presionar "Agregar Paciente"
   const handleAdd = () => {
+    // Validar que el campo nombre no esté vacío
     if (!nombre.trim()) {
       Alert.alert('Error', 'Ingrese un nombre');
       return;
     }
 
+    // Crea un nuevo objeto paciente
     const nuevoPaciente = {
-      id: Date.now(),
+      id: Date.now(), // ID temporal basado en la fecha actual
       nombre,
       telefono,
       email,
@@ -49,11 +58,14 @@ export default function AddPacienteScreen({ navigation, route }) {
       direccion,
     };
 
+    // Si existe la función addPaciente, la ejecuta
     if (addPaciente) addPaciente(nuevoPaciente);
+
+    // Vuelve a la pantalla anterior
     navigation.goBack();
   };
 
-  // ✅ Mueve el scroll al enfocar cada input
+  // ✅ Mueve el scroll al enfocar un input, evitando que quede oculto por el teclado
   const handleFocus = (refName) => {
     const scrollNode = findNodeHandle(scrollRef.current);
     const inputNode = findNodeHandle(inputRefs[refName].current);
@@ -64,18 +76,21 @@ export default function AddPacienteScreen({ navigation, route }) {
         scrollNode,
         () => {},
         (x, y) => {
+          // Desplaza el scroll 100px hacia arriba para mostrar el input enfocado
           scrollRef.current.scrollTo({ y: y - 100, animated: true });
         }
       );
     }
   };
 
+  // 🧱 Estructura visual del formulario
   return (
+    // Ajusta el contenido según la plataforma (para que el teclado no tape los inputs)
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
-      {/* Cierra el teclado al tocar fuera */}
+      {/* Cierra el teclado al tocar fuera de los inputs */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           ref={scrollRef}
@@ -83,7 +98,8 @@ export default function AddPacienteScreen({ navigation, route }) {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.container}>
-            {/* Encabezado */}
+            
+            {/* 🧩 Encabezado con ícono y título */}
             <View style={styles.header}>
               <Ionicons name="person-add-outline" size={32} color="#007ACC" />
               <View>
@@ -92,7 +108,7 @@ export default function AddPacienteScreen({ navigation, route }) {
               </View>
             </View>
 
-            {/* Campo: Nombre */}
+            {/* 🧍 Campo: Nombre */}
             <View style={styles.inputContainer}>
               <Ionicons name="person-outline" size={20} color="#007ACC" />
               <TextInput
@@ -106,7 +122,7 @@ export default function AddPacienteScreen({ navigation, route }) {
               />
             </View>
 
-            {/* Campo: Teléfono */}
+            {/* ☎️ Campo: Teléfono */}
             <View style={styles.inputContainer}>
               <Ionicons name="call-outline" size={20} color="#007ACC" />
               <TextInput
@@ -121,7 +137,7 @@ export default function AddPacienteScreen({ navigation, route }) {
               />
             </View>
 
-            {/* Campo: Email */}
+            {/* 📧 Campo: Email */}
             <View style={styles.inputContainer}>
               <Ionicons name="mail-outline" size={20} color="#007ACC" />
               <TextInput
@@ -137,7 +153,7 @@ export default function AddPacienteScreen({ navigation, route }) {
               />
             </View>
 
-            {/* Campo: Edad */}
+            {/* 🎂 Campo: Edad */}
             <View style={styles.inputContainer}>
               <Ionicons name="calendar-outline" size={20} color="#007ACC" />
               <TextInput
@@ -152,7 +168,7 @@ export default function AddPacienteScreen({ navigation, route }) {
               />
             </View>
 
-            {/* Campo: Dirección */}
+            {/* 🏠 Campo: Dirección */}
             <View style={styles.inputContainer}>
               <Ionicons name="home-outline" size={20} color="#007ACC" />
               <TextInput
@@ -166,13 +182,13 @@ export default function AddPacienteScreen({ navigation, route }) {
               />
             </View>
 
-            {/* Botón principal */}
+            {/* ✅ Botón principal: Agregar paciente */}
             <TouchableOpacity style={styles.primaryButton} onPress={handleAdd}>
               <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
               <Text style={styles.buttonText}>Agregar Paciente</Text>
             </TouchableOpacity>
 
-            {/* Botón volver */}
+            {/* 🔙 Botón para volver a la pantalla anterior */}
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => navigation.goBack()}
@@ -187,10 +203,11 @@ export default function AddPacienteScreen({ navigation, route }) {
   );
 }
 
+// 🎨 Estilos visuales del componente
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#EAF4FC',
+    backgroundColor: '#EAF4FC', // Fondo azul claro
   },
   container: {
     flex: 1,

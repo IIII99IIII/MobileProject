@@ -16,17 +16,22 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Ionicons } from '@expo/vector-icons';
 
+// 📋 Pantalla para editar los datos de un paciente
 export default function EditPacienteScreen({ navigation, route }) {
+  // Se reciben los datos del paciente y la función para actualizarlo desde la navegación
   const { paciente, updatePaciente } = route.params;
 
+  // Referencia del ScrollView para hacer scroll automático cuando se enfoca un campo
   const scrollRef = useRef(null);
 
+  // Estados locales para los campos del formulario
   const [nombre, setNombre] = React.useState(paciente.nombre);
   const [telefono, setTelefono] = React.useState(paciente.telefono);
   const [email, setEmail] = React.useState(paciente.email);
   const [edad, setEdad] = React.useState(paciente.edad);
   const [direccion, setDireccion] = React.useState(paciente.direccion);
 
+  // Refs individuales para cada campo (para calcular posición al enfocar)
   const inputRefs = {
     nombre: useRef(null),
     telefono: useRef(null),
@@ -35,6 +40,7 @@ export default function EditPacienteScreen({ navigation, route }) {
     direccion: useRef(null),
   };
 
+  // 📌 Cuando un input recibe foco, se hace scroll automático para que quede visible
   const handleFocus = (refName) => {
     const scrollNode = findNodeHandle(scrollRef.current);
     const inputNode = findNodeHandle(inputRefs[refName].current);
@@ -43,27 +49,36 @@ export default function EditPacienteScreen({ navigation, route }) {
       UIManager.measureLayout(
         inputNode,
         scrollNode,
-        () => {},
+        () => {}, // callback en caso de error
         (x, y) => {
+          // Desplaza el scroll para que el input quede visible
           scrollRef.current.scrollTo({ y: y - 100, animated: true });
         }
       );
     }
   };
 
+  // 💾 Función que guarda los cambios hechos al paciente
   const handleUpdate = () => {
     if (!nombre.trim()) return alert('Ingrese un nombre');
 
+    // Se crea un nuevo objeto con los datos actualizados
     const pacienteActualizado = { ...paciente, nombre, telefono, email, edad, direccion };
+
+    // Se llama a la función que actualiza al paciente en la lista principal
     updatePaciente(pacienteActualizado);
+
+    // Regresa a la pantalla anterior
     navigation.goBack();
   };
 
   return (
+    // 📱 Evita que el teclado tape los campos en iOS y Android
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
+      {/* Cierra el teclado si el usuario toca fuera del campo */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           ref={scrollRef}
@@ -72,7 +87,7 @@ export default function EditPacienteScreen({ navigation, route }) {
         >
           <Text style={styles.title}>Editar Paciente</Text>
 
-          {/* Nombre */}
+          {/* 🔹 Campo: Nombre */}
           <View style={styles.inputContainer}>
             <Ionicons name="person-outline" size={20} color="#007ACC" />
             <TextInput
@@ -86,7 +101,7 @@ export default function EditPacienteScreen({ navigation, route }) {
             />
           </View>
 
-          {/* Teléfono */}
+          {/* 🔹 Campo: Teléfono */}
           <View style={styles.inputContainer}>
             <Ionicons name="call-outline" size={20} color="#007ACC" />
             <TextInput
@@ -101,7 +116,7 @@ export default function EditPacienteScreen({ navigation, route }) {
             />
           </View>
 
-          {/* Email */}
+          {/* 🔹 Campo: Email */}
           <View style={styles.inputContainer}>
             <Ionicons name="mail-outline" size={20} color="#007ACC" />
             <TextInput
@@ -117,7 +132,7 @@ export default function EditPacienteScreen({ navigation, route }) {
             />
           </View>
 
-          {/* Edad */}
+          {/* 🔹 Campo: Edad */}
           <View style={styles.inputContainer}>
             <Ionicons name="calendar-outline" size={20} color="#007ACC" />
             <TextInput
@@ -132,7 +147,7 @@ export default function EditPacienteScreen({ navigation, route }) {
             />
           </View>
 
-          {/* Dirección */}
+          {/* 🔹 Campo: Dirección */}
           <View style={styles.inputContainer}>
             <Ionicons name="home-outline" size={20} color="#007ACC" />
             <TextInput
@@ -146,13 +161,13 @@ export default function EditPacienteScreen({ navigation, route }) {
             />
           </View>
 
-          {/* Botón actualizar */}
+          {/* ✅ Botón para guardar los cambios */}
           <TouchableOpacity style={styles.primaryButton} onPress={handleUpdate}>
             <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
             <Text style={styles.buttonText}>Actualizar Paciente</Text>
           </TouchableOpacity>
 
-          {/* Botón volver */}
+          {/* 🔙 Botón para volver sin guardar */}
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={20} color="#007ACC" />
             <Text style={styles.backText}>Volver a Pacientes</Text>
@@ -163,6 +178,7 @@ export default function EditPacienteScreen({ navigation, route }) {
   );
 }
 
+// 🎨 Estilos del componente
 const styles = StyleSheet.create({
   container: {
     padding: 20,
