@@ -1,7 +1,7 @@
-// src/navigation/Stacks.js
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
+// Importa pantallas de cada dominio
 import HomeScreen from '../screens/homeTurnoScreen/HomeTurnoScreen';
 import ProfileScreen from '../screens/profileScreen/ProfileScreen';
 import AddTurnoScreen from '../screens/addTurnoScreen/AddTurnoScreen';
@@ -13,9 +13,10 @@ import AddPacienteScreen from '../screens/pacienteScreen/AddPacienteScreen';
 import EditPacienteScreen from '../screens/pacienteScreen/EditPacienteScreen';
 import DetailPacienteScreen from '../screens/pacienteScreen/DetailPacienteScreen';
 
-
+// Crea instancia de Stack
 const Stack = createStackNavigator();
 
+// Stack para Inicio (Home + acceso a detalle de turnos)
 export function HomeStack() {
   return (
     <Stack.Navigator>
@@ -25,6 +26,7 @@ export function HomeStack() {
   );
 }
 
+// Stack para gestión de Turnos
 export function TurnoStack() {
   return (
     <Stack.Navigator>
@@ -36,6 +38,7 @@ export function TurnoStack() {
   );
 }
 
+// Stack para Perfil del usuario
 export function ProfileStack() {
   return (
     <Stack.Navigator>
@@ -43,6 +46,8 @@ export function ProfileStack() {
     </Stack.Navigator>
   );
 }
+
+// Stack para gestión de Pacientes
 export function PacienteStack() {
   return (
     <Stack.Navigator>

@@ -1,49 +1,58 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, Alert, Text, ScrollView, TouchableOpacity } from 'react-native';
+// Insets seguros para calcular padding inferior (por la barra).
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// Gestión de formularios controlados.
 import { useForm, Controller } from 'react-hook-form';
+// Firestore: colección y addDoc para crear documentos.
 import { collection, addDoc } from 'firebase/firestore';
+// Instancia de DB configurada.
 import { db } from '../../../firebaseConfig';
+// Altura de la barra para calcular padding inferior.
 import { TAB_HEIGHT } from '../../navigation/MainPagerTabs';
+// Paleta unificada
+import { COLORS } from '../../theme/colors';
 
-const COLORS = {
-  primary: '#0B69A3',
-  accent: '#29C3A5',
-  bg: '#F6FBFF',
-  inputBorder: '#E1EEF7',
-  text: '#0A2540',
-  error: '#E02424',
-};
-
+// Componente de alta de turnos
 const AddTurnoScreen = ({ navigation }) => {
+  // Configura el formulario con valores por defecto y validación declarativa
   const { control, handleSubmit, formState: { errors } } = useForm({
     defaultValues: { nombrePaciente: '', fecha: '', hora: '', motivo: '' },
   });
 
+  // Lee insets del dispositivo
   const insets = useSafeAreaInsets();
+  // Calcula padding inferior para evitar solaparse con la barra inferior custom
   const bottomPad = TAB_HEIGHT + insets.bottom + 24;
 
+  // Handler del envío del formulario válido
   const onSubmit = async (data) => {
     try {
+      // Crea un documento en la colección 'turnos' con campos normalizados (trim)
       await addDoc(collection(db, 'turnos'), {
         nombrePaciente: data.nombrePaciente.trim(),
         fecha: data.fecha.trim(),
         hora: data.hora.trim(),
         motivo: data.motivo.trim(),
-        creadoEn: new Date().toISOString(),
+        creadoEn: new Date().toISOString(), // timestamp ISO de creación
       });
+      // Notifica éxito
       Alert.alert('Éxito', 'Turno añadido correctamente.');
+      // Regresa a la lista de turnos
       navigation.navigate('TurnoList');
     } catch (error) {
+      // Log y alerta de error genérico
       console.error('Error añadiendo turno: ', error);
       Alert.alert('Error', 'No se pudo añadir el turno.');
     }
   };
 
+  // Render con ScrollView (evita que el teclado tape inputs)
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingBottom: bottomPad }]}>
       <Text style={styles.header}>Agregar Turno</Text>
 
+      {/* Campo: Nombre del Paciente */}
       <Text style={styles.label}>Nombre del Paciente</Text>
       <Controller
         control={control}
@@ -62,6 +71,7 @@ const AddTurnoScreen = ({ navigation }) => {
       />
       {errors.nombrePaciente && <Text style={styles.errorText}>{errors.nombrePaciente.message}</Text>}
 
+      {/* Campo: Fecha (YYYY-MM-DD) */}
       <Text style={styles.label}>Fecha (YYYY-MM-DD)</Text>
       <Controller
         control={control}
@@ -83,6 +93,7 @@ const AddTurnoScreen = ({ navigation }) => {
       />
       {errors.fecha && <Text style={styles.errorText}>{errors.fecha.message}</Text>}
 
+      {/* Campo: Hora (HH:MM) */}
       <Text style={styles.label}>Hora (HH:MM)</Text>
       <Controller
         control={control}
@@ -104,6 +115,7 @@ const AddTurnoScreen = ({ navigation }) => {
       />
       {errors.hora && <Text style={styles.errorText}>{errors.hora.message}</Text>}
 
+      {/* Campo: Motivo */}
       <Text style={styles.label}>Motivo de la Consulta</Text>
       <Controller
         control={control}
@@ -123,6 +135,7 @@ const AddTurnoScreen = ({ navigation }) => {
       />
       {errors.motivo && <Text style={styles.errorText}>{errors.motivo.message}</Text>}
 
+      {/* Botón: dispara handleSubmit que valida y llama a onSubmit */}
       <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit(onSubmit)}>
         <Text style={styles.primaryButtonText}>Guardar Turno</Text>
       </TouchableOpacity>
@@ -130,27 +143,28 @@ const AddTurnoScreen = ({ navigation }) => {
   );
 };
 
+// Estilos con la paleta unificada
 const styles = StyleSheet.create({
-  container: { padding: 20, backgroundColor: COLORS.bg },
-  header: { fontSize: 22, fontWeight: '700', color: COLORS.text, marginBottom: 16, textAlign: 'center' },
-  label: { fontSize: 14, fontWeight: '600', color: COLORS.text, marginBottom: 6 },
+  container: { padding: 20, backgroundColor: COLORS.bgSoft },
+  header: { fontSize: 22, fontWeight: '700', color: COLORS.primaryDark, marginBottom: 16, textAlign: 'center' },
+  label: { fontSize: 14, fontWeight: '600', color: COLORS.primaryDark, marginBottom: 6 },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.cardBg,
     borderWidth: 1,
-    borderColor: COLORS.inputBorder,
+    borderColor: COLORS.borderSoft,
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderRadius: 10,
     marginBottom: 10,
     fontSize: 16,
-    color: COLORS.text,
-    shadowColor: '#000',
+    color: COLORS.textMain,
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.03,
     shadowOffset: { width: 0, height: 1 },
     shadowRadius: 2,
   },
-  inputError: { borderColor: COLORS.error },
-  errorText: { color: COLORS.error, marginBottom: 8 },
+  inputError: { borderColor: COLORS.danger },
+  errorText: { color: COLORS.danger, marginBottom: 8 },
   primaryButton: {
     marginTop: 8,
     backgroundColor: COLORS.primary,

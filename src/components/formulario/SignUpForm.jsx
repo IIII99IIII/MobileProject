@@ -1,5 +1,6 @@
-// src/components/formulario/SignUpForm.jsx
+// Importa React para componentes funcionales.
 import React from 'react';
+// Importa componentes base de RN.
 import {
   View,
   Text,
@@ -12,32 +13,45 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+// Fondo con degradado.
 import { LinearGradient } from 'expo-linear-gradient';
+// Hook/controlador de formularios.
 import { useForm, Controller } from 'react-hook-form';
+// Crea usuarios con email/clave en Firebase Auth.
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+// Instancia de auth del proyecto.
 import { auth } from '../../../firebaseConfig';
 
+// Componente de Registro; recibe navigation.
 export default function SignUpForm({ navigation }) {
+  // Inicializa el form con control, submit, errores y getValues (para confirmar password).
   const {
     control,
     handleSubmit,
     formState: { errors },
     getValues,
   } = useForm({
+    // Valores iniciales de los campos.
     defaultValues: { email: '', password: '', confirmPassword: '' },
   });
 
+  // Handler del submit correcto.
   const onSubmit = async (data) => {
     try {
+      // Intenta crear el usuario en Firebase Auth.
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         data.email,
         data.password
       );
+      // Si funciona, loguea el correo del nuevo usuario.
       console.log('¡Usuario registrado!', userCredential.user.email);
+      // Muestra alerta de bienvenida.
       Alert.alert('¡Bienvenido!', 'Tu cuenta ha sido creada exitosamente.');
     } catch (error) {
+      // Si falla, imprime código y mensaje de error.
       console.error('Error de registro:', error.code, error.message);
+      // Manejo de casos típicos: correo en uso / password débil / genérico.
       if (error.code === 'auth/email-already-in-use') {
         Alert.alert('Error', 'Este correo electrónico ya está en uso.');
       } else if (error.code === 'auth/weak-password') {
@@ -48,14 +62,19 @@ export default function SignUpForm({ navigation }) {
     }
   };
 
+  // Render de la pantalla de registro.
   return (
+    // Fondo en degradado suave.
     <LinearGradient colors={['#E6F3FA', '#F6FBFF']} style={styles.gradient}>
+      {/* Ajuste del teclado por plataforma. */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
       >
+        {/* Scroll principal de la UI. */}
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+          {/* Contenedor circular para el logo con un leve degradado. */}
           <View style={styles.logoContainer}>
             <LinearGradient colors={['#ffffff', '#E6F3FA']} style={styles.logoBackground}>
               <Image
@@ -66,9 +85,10 @@ export default function SignUpForm({ navigation }) {
             </LinearGradient>
           </View>
 
+          {/* Título de pantalla. */}
           <Text style={styles.header}>Crear Cuenta — Odontología Integral GF</Text>
 
-          {/* EMAIL */}
+          {/* Campo EMAIL con validaciones. */}
           <Text style={styles.label}>Email</Text>
           <Controller
             control={control}
@@ -92,7 +112,7 @@ export default function SignUpForm({ navigation }) {
           />
           {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
 
-          {/* PASSWORD */}
+          {/* Campo PASSWORD con longitud mínima. */}
           <Text style={styles.label}>Contraseña</Text>
           <Controller
             control={control}
@@ -115,7 +135,7 @@ export default function SignUpForm({ navigation }) {
           />
           {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
 
-          {/* CONFIRM PASSWORD */}
+          {/* Campo CONFIRM PASSWORD que valida igualdad con 'password'. */}
           <Text style={styles.label}>Confirmar Contraseña</Text>
           <Controller
             control={control}
@@ -141,13 +161,14 @@ export default function SignUpForm({ navigation }) {
             <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
           )}
 
-          {/* BUTTONS */}
+          {/* Botón principal: envía el formulario (valida y ejecuta onSubmit). */}
           <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit(onSubmit)}>
             <LinearGradient colors={['#0B69A3', '#29C3A5']} style={styles.primaryButtonGradient}>
               <Text style={styles.primaryButtonText}>Registrar Cuenta</Text>
             </LinearGradient>
           </TouchableOpacity>
 
+          {/* Botón secundario: volver al login. */}
           <TouchableOpacity style={styles.backToLogin} onPress={() => navigation.goBack()}>
             <Text style={styles.backToLoginText}>Volver al inicio</Text>
           </TouchableOpacity>
@@ -157,6 +178,7 @@ export default function SignUpForm({ navigation }) {
   );
 }
 
+// Colores locales de esta pantalla (luego unificamos con theme).
 const COLORS = {
   primary: '#0B69A3',
   accent: '#29C3A5',
@@ -166,23 +188,24 @@ const COLORS = {
   error: '#E02424',
 };
 
+// Hoja de estilos de la pantalla de registro.
 const styles = StyleSheet.create({
   gradient: {
-    flex: 1,
+    flex: 1, // Ocupa todo el alto.
   },
   container: {
-    flexGrow: 1,
-    padding: 24,
-    justifyContent: 'center',
+    flexGrow: 1, // Crece con contenido.
+    padding: 24, // Margen interno.
+    justifyContent: 'center', // Centra vertical.
   },
   logoContainer: {
-    alignItems: 'center',
-    marginBottom: 15,
+    alignItems: 'center', // Centra logo horizontal.
+    marginBottom: 15, // Separación inferior.
   },
   logoBackground: {
     width: 130,
     height: 130,
-    borderRadius: 100,
+    borderRadius: 100, // Círculo.
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
