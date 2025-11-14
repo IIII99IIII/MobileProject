@@ -22,85 +22,101 @@ import { auth } from '../../../firebaseConfig';
 // Componente para fondos con degradado (Expo).
 import { LinearGradient } from 'expo-linear-gradient';
 
-// Exporta el componente por defecto; recibe 'navigation' desde React Navigation.
+// Componente principal para iniciar sesión. Recibe 'navigation' para cambiar de pantalla.
 export default function LoginForm({ navigation }) {
-  // Inicializa el form: control para inputs, handleSubmit para submit,
-  // y 'errors' para mostrar mensajes de validación.
+
+  // Inicializa el formulario usando react-hook-form:
+  // - control: conecta inputs al hook
+  // - handleSubmit: valida y ejecuta el submit
+  // - errors: contiene los errores de cada campo
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    // Valores iniciales para los campos.
+    // Valores iniciales del formulario.
     defaultValues: { email: '', password: '' },
   });
 
-  // Función asíncrona que se ejecuta al enviar el formulario válido.
+  // onSubmit se ejecuta SOLO si la validación del formulario es correcta.
   const onSubmit = async (data) => {
     try {
-      // Intenta autenticar al usuario con email y password mediante Firebase.
+      // Intenta iniciar sesión con Firebase utilizando email y password.
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      // Si no falla, registra en consola el correo del usuario autenticado.
+
+      // Si todo salió bien, muestra por consola el usuario autenticado.
       console.log('¡Login exitoso!', userCredential.user.email);
+
     } catch (error) {
-      // En caso de error, muestra detalle por consola (código y mensaje de Firebase).
+      // Muestra en consola el error exacto que devuelve Firebase.
       console.error('Error de autenticación:', error.code, error.message);
-      // Si la clave es incorrecta o el usuario no existe, alerta de credenciales invalidas.
+
+      // Manejo de errores más habituales de login.
       if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-        Alert.alert('Error de Inicio de Sesión', 'El correo electrónico o la contraseña son incorrectos.');
+        Alert.alert(
+          'Error de Inicio de Sesión',
+          'El correo electrónico o la contraseña son incorrectos.'
+        );
       } else {
-        // Para cualquier otro error, muestra un mensaje genérico.
-        Alert.alert('Error', 'Ocurrió un problema inesperado. Por favor, inténtalo de nuevo.');
+        // Si es un error desconocido, muestra mensaje genérico.
+        Alert.alert(
+          'Error',
+          'Ocurrió un problema inesperado. Por favor, inténtalo de nuevo.'
+        );
       }
     }
   };
 
-  // Render del componente
+  // Render principal de la pantalla.
   return (
-    // Fondo con degradado; aplica estilos del StyleSheet.
+    // Aplica un fondo con degradado usando LinearGradient.
     <LinearGradient
       colors={['#e3f2f9', '#c8e0ea', '#b0d3e0']}
       style={styles.gradientBackground}
     >
-      {/* Ajusta el layout cuando aparece el teclado (iOS padding / Android height). */}
+
+      {/* Ajusta la vista cuando aparece el teclado (en iOS usa padding, en Android height). */}
       <KeyboardAvoidingView
         style={styles.avoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Scroll para permitir desplazamiento si el teclado/altura oculta elementos. */}
+
+        {/* Permite hacer scroll si el teclado tapa parte del formulario. */}
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Tarjeta contenedora del formulario */}
+
+          {/* Tarjeta blanca donde vive todo el formulario de login */}
           <View style={styles.card}>
-            {/* Logo de la app/clinica */}
+
+            {/* Logo de la clínica */}
             <Image
               source={require('../../../assets/logo_cf.png')}
               style={styles.logo}
               resizeMode="contain"
             />
 
-            {/* Título de pantalla */}
+            {/* Título principal del formulario */}
             <Text style={styles.header}>Ingreso — Odontología Integral</Text>
 
-            {/* Etiqueta Email */}
+            {/* ======== Campo EMAIL ======== */}
             <Text style={styles.label}>Email</Text>
-            {/* Controller vincula el TextInput con react-hook-form */}
+
+            {/* Controller conecta el TextInput con react-hook-form */}
             <Controller
               control={control}
               name="email"
-              // Reglas de validación: requerido y patrón de email básico.
+              // Reglas de validación básicas para email.
               rules={{
                 required: 'El email es obligatorio.',
                 pattern: { value: /^\S+@\S+\.\S+$/i, message: 'Formato de email inválido.' },
               }}
-              // Renderiza el TextInput controlado (onChange, onBlur, value viene del form).
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
-                  onBlur={onBlur}
+                  style={[styles.input, errors.email && styles.inputError]} // Estilo dinámico si hay error
+                  onBlur={onBlur}      // Marca el input como tocado
                   onChangeText={onChange}
                   value={value}
                   placeholder="tu.correo@ejemplo.com"
@@ -110,15 +126,17 @@ export default function LoginForm({ navigation }) {
                 />
               )}
             />
-            {/* Si hay error en email, muestra el mensaje. */}
+
+            {/* Muestra error debajo si la validación falla */}
             {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
 
-            {/* Etiqueta Contraseña */}
+            {/* ======== Campo CONTRASEÑA ======== */}
             <Text style={styles.label}>Contraseña</Text>
+
             <Controller
               control={control}
               name="password"
-              // Reglas: requerido y mínimo 6 caracteres.
+              // Reglas: requerido y mínimo de 6 caracteres.
               rules={{
                 required: 'La contraseña es obligatoria.',
                 minLength: { value: 6, message: 'Debe tener al menos 6 caracteres.' },
@@ -130,26 +148,30 @@ export default function LoginForm({ navigation }) {
                   onChangeText={onChange}
                   value={value}
                   placeholder="********"
-                  secureTextEntry
+                  secureTextEntry // Oculta los caracteres
                   placeholderTextColor="#9FBFD9"
                 />
               )}
             />
-            {/* Mensaje de error para password si aplica. */}
+
+            {/* Error de contraseña si corresponde */}
             {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
 
-            {/* Botón para enviar el formulario; usa handleSubmit que valida y ejecuta onSubmit. */}
+            {/* ======== Botón de Iniciar Sesión ======== */}
             <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit(onSubmit)}>
               <Text style={styles.primaryButtonText}>Iniciar Sesión</Text>
             </TouchableOpacity>
 
-            {/* Enlace hacia registro si no tiene cuenta */}
+            {/* ======== Enlace a registro (Sign Up) ======== */}
             <View style={styles.signUpContainer}>
               <Text style={styles.signUpText}>¿No tienes una cuenta?</Text>
+
+              {/* Navega a la pantalla de registro */}
               <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                 <Text style={styles.linkText}>Regístrate aquí</Text>
               </TouchableOpacity>
             </View>
+
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -157,7 +179,7 @@ export default function LoginForm({ navigation }) {
   );
 }
 
-// Paleta local (esta se reemplazará con theme compartido más abajo).
+// Paleta de colores local (será unificada luego con un theme global).
 const COLORS = {
   azulFranja: '#2e7d9d',
   azulTexto: '#2e7d9d',
@@ -170,75 +192,89 @@ const COLORS = {
   texto: '#2e7d9d',
 };
 
-// Hoja de estilos de la pantalla.
+// Hoja de estilos completa del Login.
 const styles = StyleSheet.create({
   gradientBackground: {
-    flex: 1, // Ocupa toda la pantalla.
+    flex: 1, // Ocupa toda la pantalla completa.
   },
   avoidingView: {
-    flex: 1, // Permite que KeyboardAvoidingView expanda.
+    flex: 1, // Permite que el contenido se adapte cuando aparece el teclado.
   },
   scrollContainer: {
-    flexGrow: 1, // Permite que el ScrollView crezca con su contenido.
-    justifyContent: 'center', // Centra el card verticalmente.
-    padding: 20, // Margen interior lateral.
+    flexGrow: 1, // Deja que el contenido crezca verticalmente dentro del ScrollView.
+    justifyContent: 'center', // Centra verticalmente la tarjeta.
+    padding: 20,
   },
   card: {
-    width: '100%', // Ocupa el ancho disponible.
-    backgroundColor: COLORS.fondoCard, // Fondo casi blanco.
-    borderRadius: 20, // Bordes redondeados.
-    padding: 24, // Padding interno.
-    elevation: 6, // Sombra en Android.
-    shadowColor: '#000', // Sombra en iOS.
+    width: '100%',
+    backgroundColor: COLORS.fondoCard, // Fondo blanco semiopaco.
+    borderRadius: 20,
+    padding: 24,
+    elevation: 6, // Sombra Android.
+    shadowColor: '#000', // Sombra iOS.
     shadowOpacity: 0.15,
     shadowRadius: 6,
   },
   logo: {
-    width: 130, // Tamaño del logo.
+    width: 130,
     height: 130,
-    alignSelf: 'center', // Centrado horizontal.
-    marginBottom: 10, // Separación con el título.
+    alignSelf: 'center',
+    marginBottom: 10,
   },
   header: {
-    fontSize: 22, // Tamaño del título.
-    fontWeight: '700', // Negrita fuerte.
-    color: COLORS.azulTexto, // Color principal.
-    marginBottom: 20, // Espacio bajo el título.
-    textAlign: 'center', // Centrado.
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.azulTexto,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   label: {
-    fontSize: 14, // Tamaño etiqueta.
-    fontWeight: '600', // Semi-negrita.
+    fontSize: 14,
+    fontWeight: '600',
     color: COLORS.azulTexto,
-    marginBottom: 6, // Separación con input.
+    marginBottom: 6,
   },
   input: {
-    backgroundColor: '#fff', // Fondo blanco del input.
-    borderWidth: 1, // Borde fino.
-    borderColor: '#b0d3e0', // Borde celeste claro.
-    paddingHorizontal: 12, // Padding horizontal.
-    paddingVertical: 12, // Padding vertical.
-    borderRadius: 10, // Bordes redondeados.
-    marginBottom: 10, // Separación entre inputs.
-    fontSize: 16, // Tamaño texto input.
-    color: COLORS.azulTexto, // Color texto input.
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#b0d3e0',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginBottom: 10,
+    fontSize: 16,
+    color: COLORS.azulTexto,
   },
-  inputError: { borderColor: COLORS.error }, // Cambia color de borde cuando hay error.
-  errorText: { color: COLORS.error, marginBottom: 8 }, // Estilo texto de error.
+  inputError: {
+    borderColor: COLORS.error, // Resalta el borde en rojo si hay error.
+  },
+  errorText: {
+    color: COLORS.error,
+    marginBottom: 8,
+  },
   primaryButton: {
-    marginTop: 12, // Separación arriba.
-    backgroundColor: COLORS.azulFranja, // Color botón.
-    paddingVertical: 14, // Altura del botón.
-    borderRadius: 12, // Bordes redondeados.
-    alignItems: 'center', // Centra el texto.
-    elevation: 3, // Sombra Android.
+    marginTop: 12,
+    backgroundColor: COLORS.azulFranja,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    elevation: 3,
   },
   primaryButtonText: {
-    color: 'white', // Texto blanco.
-    fontSize: 16, // Tamaño texto.
-    fontWeight: '700', // Negrita.
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '700',
   },
-  signUpContainer: { marginTop: 20, alignItems: 'center' }, // Contenedor enlace registro.
-  signUpText: { color: '#6B8FAF' }, // Texto "¿No tienes cuenta?"
-  linkText: { color: COLORS.verde, marginTop: 6, fontWeight: '600' }, // Link a registro.
+  signUpContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  signUpText: {
+    color: '#6B8FAF',
+  },
+  linkText: {
+    color: COLORS.verde,
+    marginTop: 6,
+    fontWeight: '600',
+  },
 });
